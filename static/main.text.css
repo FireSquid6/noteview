@@ -445,3 +445,112 @@ details summary::-moz-details-marker {
   .content h2 { font-size: 1.75rem; }
   .content h3 { font-size: 1.375rem; }
 }
+
+/* Print styles */
+@media print {
+  /* Light background, dark text */
+  body {
+    background: #fff;
+    color: #1a1a1a;
+  }
+
+  /* Hide chrome: header, sidebar */
+  .header,
+  #sidebar-container,
+  .sidebar-toggle {
+    display: none !important;
+  }
+
+  /* Content fills the page */
+  .app-layout,
+  .main-layout,
+  .content-wrapper {
+    display: block;
+    max-width: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .content {
+    background: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+  }
+
+  /* Typography: dark text for print */
+  .content h1, .content h2, .content h3,
+  .content h4, .content h5, .content h6 {
+    color: #000;
+  }
+
+  .content p,
+  .content li,
+  .content td {
+    color: #1a1a1a;
+  }
+
+  .content a {
+    color: #1a1a1a;
+    text-decoration: underline;
+  }
+
+  /* Code blocks */
+  .content pre {
+    background-color: #f4f4f5;
+    border: 1px solid #d4d4d8;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+
+  .content pre code {
+    color: #1a1a1a;
+  }
+
+  .content code {
+    background-color: #e4e4e7;
+    color: #1a1a1a;
+  }
+
+  /* Tables */
+  .content th {
+    background-color: #e4e4e7;
+    color: #000;
+  }
+
+  .content th, .content td {
+    border-color: #a1a1aa;
+  }
+
+  /* Blockquotes */
+  .content blockquote {
+    border-left-color: #3f3f46;
+    color: #52525b;
+  }
+
+  /* Horizontal rules */
+  .content hr {
+    background-color: #d4d4d8;
+  }
+
+  /* Page break handling */
+  .content h1, .content h2, .content h3,
+  .content h4, .content h5, .content h6 {
+    break-after: avoid;
+  }
+
+  .content pre,
+  .content blockquote,
+  .content table,
+  .content img,
+  .content svg {
+    break-inside: avoid;
+  }
+
+  /* Mermaid diagrams */
+  .mermaid svg {
+    max-width: 100%;
+    height: auto !important;
+    break-inside: avoid;
+  }
+}
