@@ -60,3 +60,7 @@ To your `~/.bashrc` (other shells like fish or zsh will require different setup)
 - [ ] apt package
 - [x] easy install script
 - [ ] search button
+- [x] mermaid rendering
+- [ ] better print view
+- [ ] theme switching
+
