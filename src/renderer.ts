@@ -1,10 +1,11 @@
-// @ts-expect-error no types
-import extendedLatex from "marked-extended-latex";
 import { markedHighlight } from "marked-highlight";
 import Katex from "katex";
 import { marked } from "marked";
 import hljs from "highlight.js";
 import fm from "front-matter";
+// @ts-expect-error no types
+import extendedLatex from "marked-extended-latex";
+import markedMermaid from "@maddyguthridge/marked-mermaid";
 
 
 const options = {
@@ -26,7 +27,7 @@ marked.use(markedHighlight({
     return hljs.highlight(code, { language }).value;
   }
 }));
-
+marked.use(markedMermaid())
 
 
 export async function renderHtml(markdown: string): Promise<string> {

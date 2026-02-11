@@ -6,26 +6,28 @@
     "@types/bun": "latest"
   },
   "peerDependencies": {
-    "typescript": "^5.0.0"
+    "typescript": "^5.9.3"
   },
   "dependencies": {
     "@commander-js/extra-typings": "^14.0.0",
-    "@elysiajs/cors": "^1.1.0",
-    "@elysiajs/static": "^1.1.0",
-    "@kitajs/html": "^4.2.11",
-    "@sinclair/typebox": "^0.34.41",
+    "@elysiajs/cors": "^1.4.1",
+    "@elysiajs/static": "^1.4.7",
+    "@kitajs/html": "^4.2.12",
+    "@maddyguthridge/marked-mermaid": "^0.1.2",
+    "@sinclair/typebox": "^0.34.48",
     "@types/mathjax": "^0.0.40",
-    "commander": "^14.0.2",
-    "elysia": "^1.4.18",
+    "commander": "^14.0.3",
+    "elysia": "^1.4.24",
     "front-matter": "^4.0.2",
     "highlight.js": "^11.11.1",
     "htmx.org": "^2.0.8",
-    "katex": "^0.16.27",
-    "logestic": "^1.2.3",
-    "marked": "^17.0.1",
+    "katex": "^0.16.28",
+    "logestic": "^1.2.4",
+    "marked": "^17.0.2",
     "marked-extended-latex": "^1.1.0",
     "marked-highlight": "^2.2.3",
-    "mathjax": "^4.0.0",
+    "mathjax": "^4.1.0",
+    "mermaid": "^11.12.2",
     "tailwindcss": "^4.1.18"
   },
   "scripts": {

@@ -21,6 +21,7 @@ export function Layout({ filename, filetree, children, activePath }: LayoutProps
         <link rel="stylesheet" href={`${PACKAGE_FILES_PREFIX}/katex.css`} />
         <link rel="stylesheet" href={`${MDSERVE_ROUTE}/main.css`} />
         <script src={`${PACKAGE_FILES_PREFIX}/htmx.js`} />
+        <script src={`${PACKAGE_FILES_PREFIX}/mermaid.js`} />
         <script src={`${PACKAGE_FILES_PREFIX}/katex.js`} />
         <script src={`${MDSERVE_ROUTE}/main.js`} />
       </head>

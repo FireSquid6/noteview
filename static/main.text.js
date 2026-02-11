@@ -1,6 +1,10 @@
 function getCurrentPath() {
   return window.location.pathname.slice(1);
 }
+mermaid.initialize({
+  securityLevel: "loose",
+  theme: "dark",
+});
 
 async function refreshSidebar() {
   const response = await fetch(`/__only-sidebar/${getCurrentPath()}`);
