@@ -29,6 +29,23 @@ marked.use(markedHighlight({
 }));
 marked.use(markedMermaid())
 
+// Rewrite local .md links to match the server's extensionless routing
+marked.use({
+  walkTokens(token) {
+    if (token.type === 'link' && token.href) {
+      const href = token.href;
+      if (!href.match(/^[a-z]+:\/\//i) && !href.startsWith('#')) {
+        const hashIndex = href.indexOf('#');
+        if (hashIndex === -1) {
+          token.href = href.replace(/\.md$/, '');
+        } else {
+          const pathPart = href.slice(0, hashIndex).replace(/\.md$/, '');
+          token.href = pathPart + href.slice(hashIndex);
+        }
+      }
+    }
+  }
+});
 
 export async function renderHtml(markdown: string): Promise<string> {
   const { body } = fm(markdown);

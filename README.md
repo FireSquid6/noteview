@@ -53,13 +53,11 @@ To your `~/.bashrc` (other shells like fish or zsh will require different setup)
 - [x] directory listing page
 - [x] the sidebar auto expands to the correct place
 - [x] listener that reloads automatically
-- [ ] following local links correctly
+- [x] following local links correctly
 - [x] metadata handling
 - [x] sort directories and files in the sidebar
-- [ ] AUR package
-- [ ] apt package
 - [x] easy install script
-- [ ] search button
+- [x] search button
 - [x] mermaid rendering
 - [x] better print view
 - [x] theme switching
