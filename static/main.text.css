@@ -603,6 +603,7 @@ details summary::-moz-details-marker {
 }
 
 [data-theme="light"] .content pre code {
+  background-color: transparent;
   color: #27272a;
 }
 
