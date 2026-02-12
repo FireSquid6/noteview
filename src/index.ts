@@ -18,6 +18,7 @@ const program = new Command()
       watchForUpdates: opts.watch ?? false,
     }
 
+
     serveDirectory(options);
 
   })

@@ -547,8 +547,27 @@ details summary::-moz-details-marker {
     break-inside: avoid;
   }
 
-  /* Mermaid diagrams */
+  /* KaTeX math */
+  .katex,
+  .katex-display {
+    color: #1a1a1a !important;
+  }
+
+  .katex-display {
+    break-inside: avoid;
+    overflow: visible !important;
+  }
+
+  .katex .katex-mathml {
+    position: absolute;
+    clip: rect(1px, 1px, 1px, 1px);
+    overflow: hidden;
+  }
+
+  /* Mermaid diagrams - invert dark theme to light for print */
+  .mermaid,
   .mermaid svg {
+    filter: invert(1) hue-rotate(180deg);
     max-width: 100%;
     height: auto !important;
     break-inside: avoid;
