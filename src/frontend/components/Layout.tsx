@@ -16,7 +16,7 @@ export function Layout({ filename, filetree, children, activePath }: LayoutProps
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Markdown Preview - {filename}</title>
+        <title>Noteview - {filename}</title>
         <link rel="stylesheet" href={`${PACKAGE_FILES_PREFIX}/highlight.css`} />
         <link rel="stylesheet" href={`${PACKAGE_FILES_PREFIX}/katex.css`} />
         <link rel="stylesheet" href={`${MDSERVE_ROUTE}/main.css`} />

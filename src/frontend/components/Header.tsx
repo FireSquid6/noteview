@@ -10,9 +10,12 @@ export function Header({ filename }: HeaderProps): JSX.Element {
           <button id="sidebar-toggle" class="sidebar-toggle">
             <span class="toggle-icon">☰</span>
           </button>
-          <h1 class="header-title">Markdown Preview</h1>
+          <h1 class="header-title">Noteview</h1>
         </div>
-        <div class="filename-display">{filename || "Untitled"}</div>
+        <div class="header-right">
+          <div class="filename-display">{filename || "Untitled"}</div>
+          <button id="theme-toggle" class="theme-toggle"><span class="theme-icon"></span></button>
+        </div>
       </div>
     </header>
   );
