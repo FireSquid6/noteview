@@ -212,4 +212,194 @@ document.addEventListener('DOMContentLoaded', function() {
   saveMermaidSources();
 
   setupWebsocket();
+  initSearch();
 });
+
+// Search functionality
+function initSearch() {
+  const modal = document.getElementById('search-modal');
+  const backdrop = modal?.querySelector('.search-modal-backdrop');
+  const input = document.getElementById('search-input');
+  const resultsContainer = document.getElementById('search-results');
+
+  if (!modal || !input || !resultsContainer) return;
+
+  let debounceTimer = null;
+  let selectedIndex = -1;
+  let currentResults = [];
+
+  function openSearch() {
+    modal.style.display = 'flex';
+    input.value = '';
+    resultsContainer.innerHTML = '<div class="search-empty">Type to search...</div>';
+    selectedIndex = -1;
+    currentResults = [];
+    // Delay focus slightly so the key event doesn't land in the input
+    requestAnimationFrame(() => input.focus());
+  }
+
+  function closeSearch() {
+    modal.style.display = 'none';
+    input.value = '';
+    selectedIndex = -1;
+    currentResults = [];
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function renderResults(results) {
+    currentResults = results;
+    selectedIndex = -1;
+
+    if (results.length === 0) {
+      resultsContainer.innerHTML = '<div class="search-empty">No results found</div>';
+      return;
+    }
+
+    let html = '';
+    for (let i = 0; i < results.length; i++) {
+      const r = results[i];
+      const icon = r.type === 'filename' && !r.matches ? '\uD83D\uDCC4' : '\uD83D\uDD0D';
+
+      html += '<div class="search-result-item" data-index="' + i + '">';
+      html += '<div class="search-result-header">';
+      html += '<span class="search-result-icon">' + icon + '</span>';
+      html += '<span class="search-result-filename">' + escapeHtml(r.filename) + '</span>';
+      html += '<span class="search-result-path">' + escapeHtml(r.displayPath) + '</span>';
+      html += '</div>';
+
+      if (r.matches && r.matches.length > 0) {
+        html += '<div class="search-result-matches">';
+        for (const m of r.matches) {
+          const before = escapeHtml(m.lineContent.slice(0, m.matchStart));
+          const match = escapeHtml(m.lineContent.slice(m.matchStart, m.matchEnd));
+          const after = escapeHtml(m.lineContent.slice(m.matchEnd));
+          html += '<div class="search-match-line">';
+          html += '<span class="search-match-linenum">' + m.lineNumber + '</span>';
+          html += '<span class="search-match-text">' + before + '<span class="search-highlight">' + match + '</span>' + after + '</span>';
+          html += '</div>';
+        }
+        html += '</div>';
+      }
+
+      html += '</div>';
+    }
+
+    resultsContainer.innerHTML = html;
+  }
+
+  function updateSelection() {
+    const items = resultsContainer.querySelectorAll('.search-result-item');
+    items.forEach((item, i) => {
+      item.classList.toggle('selected', i === selectedIndex);
+    });
+    if (selectedIndex >= 0 && items[selectedIndex]) {
+      items[selectedIndex].scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  function navigateToResult(index) {
+    if (index < 0 || index >= currentResults.length) return;
+    const result = currentResults[index];
+    closeSearch();
+    window.location.href = result.displayPath;
+  }
+
+  // Open: Ctrl+K / Cmd+K
+  document.addEventListener('keydown', function(e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+      e.preventDefault();
+      openSearch();
+      return;
+    }
+    // "/" key when not in an input field
+    if (e.key === '/' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+      e.preventDefault();
+      openSearch();
+    }
+  });
+
+  // Close on backdrop click
+  if (backdrop) {
+    backdrop.addEventListener('click', closeSearch);
+  }
+
+  // Header search button
+  const searchToggle = document.getElementById('search-toggle');
+  if (searchToggle) {
+    searchToggle.addEventListener('click', openSearch);
+  }
+
+  // Input handling with keyboard nav
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      closeSearch();
+      return;
+    }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (currentResults.length > 0) {
+        selectedIndex = Math.min(selectedIndex + 1, currentResults.length - 1);
+        updateSelection();
+      }
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (currentResults.length > 0) {
+        selectedIndex = Math.max(selectedIndex - 1, 0);
+        updateSelection();
+      }
+      return;
+    }
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (selectedIndex >= 0) {
+        navigateToResult(selectedIndex);
+      } else if (currentResults.length > 0) {
+        navigateToResult(0);
+      }
+      return;
+    }
+  });
+
+  // Debounced search on input
+  input.addEventListener('input', function() {
+    clearTimeout(debounceTimer);
+    const query = input.value.trim();
+
+    if (query.length < 2) {
+      resultsContainer.innerHTML = '<div class="search-empty">Type to search...</div>';
+      currentResults = [];
+      selectedIndex = -1;
+      return;
+    }
+
+    debounceTimer = setTimeout(async () => {
+      try {
+        const response = await fetch('/__search?q=' + encodeURIComponent(query));
+        const results = await response.json();
+        // Only update if input hasn't changed
+        if (input.value.trim() === query) {
+          renderResults(results);
+        }
+      } catch {
+        resultsContainer.innerHTML = '<div class="search-empty">Search error</div>';
+      }
+    }, 300);
+  });
+
+  // Click on result
+  resultsContainer.addEventListener('click', function(e) {
+    const item = e.target.closest('.search-result-item');
+    if (item) {
+      const index = parseInt(item.dataset.index, 10);
+      navigateToResult(index);
+    }
+  });
+}

@@ -14,6 +14,7 @@ export function Header({ filename }: HeaderProps): JSX.Element {
         </div>
         <div class="header-right">
           <div class="filename-display">{filename || "Untitled"}</div>
+          <button id="search-toggle" class="search-toggle"><span class="search-toggle-icon">&#x1F50D;</span></button>
           <button id="theme-toggle" class="theme-toggle"><span class="theme-icon"></span></button>
         </div>
       </div>

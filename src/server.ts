@@ -5,6 +5,7 @@ import { renderHtml } from "./renderer";
 import { getContentPage, getDirectoryPage, getSidebarForPage, jsxToHtml } from "./frontend";
 import { getFileTree, matchFilePath, printFilemap as printFiletree } from "./filemap";
 import { staticFilesPlugin } from "./static-files";
+import { searchFileTree } from "./search";
 
 
 export interface ServeOptions {
@@ -61,6 +62,12 @@ export function serveDirectory({ port, directory, watchForUpdates }: ServeOption
       ctx.set.headers["content-type"] = "text/plain";
       return ctx.status(200, sidebar);
 
+    })
+    .get("/__search", (ctx) => {
+      const url = new URL(ctx.request.url);
+      const query = url.searchParams.get("q") || "";
+      const results = searchFileTree(query, ctx.store.filetree);
+      return results;
     })
     .get("/*", async (ctx) => {
       const pathParts = decodeURI(ctx.path).split("/");

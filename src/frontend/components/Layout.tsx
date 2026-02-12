@@ -1,6 +1,7 @@
 import { MDSERVE_ROUTE, PACKAGE_FILES_PREFIX } from "../../server";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
+import { SearchModal } from "./SearchModal";
 import type { Node } from "@/filemap";
 
 interface LayoutProps {
@@ -38,6 +39,7 @@ export function Layout({ filename, filetree, children, activePath }: LayoutProps
               </main>
             </div>
           </div>
+          <SearchModal />
         </div>
       </body>
     </html>

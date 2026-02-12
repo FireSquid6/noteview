@@ -61,6 +61,6 @@ To your `~/.bashrc` (other shells like fish or zsh will require different setup)
 - [x] easy install script
 - [ ] search button
 - [x] mermaid rendering
-- [ ] better print view
-- [ ] theme switching
+- [x] better print view
+- [x] theme switching
 
