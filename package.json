@@ -28,6 +28,7 @@
     "marked-highlight": "^2.2.3",
     "mathjax": "^4.1.0",
     "mermaid": "^11.12.2",
+    "puppeteer": "^24.39.1",
     "tailwindcss": "^4.1.18"
   },
   "scripts": {

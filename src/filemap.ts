@@ -9,6 +9,9 @@ export type ContentData = {
 } | {
   type: "directory-listing";
   filepath: string;
+} | {
+  type: "static-file";
+  filepath: string;
 }
 
 export type FileNode = {
@@ -116,18 +119,25 @@ function getDirectoryChildren(directory: string): Node[] {
         continue;
       }
       const ext = path.extname(filepath);
-      if (ext !== ".md") {
-        continue;
+      if (ext === ".md") {
+        nodes.push({
+          type: "file",
+          name: path.basename(filename, ".md"),
+          content: {
+            type: "markdown-file",
+            filepath: filepath,
+          }
+        });
+      } else {
+        nodes.push({
+          type: "file",
+          name: filename,
+          content: {
+            type: "static-file",
+            filepath: filepath,
+          }
+        });
       }
-
-      nodes.push({
-        type: "file",
-        name: path.basename(filename, ".md"),
-        content: {
-          type: "markdown-file",
-          filepath: filepath,
-        }
-      });
     }
 
   }

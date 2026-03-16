@@ -19,7 +19,26 @@ export const PACKAGE_FILES_PREFIX = "/__packagefiles";
 
 
 
-export function serveDirectory({ port, directory, watchForUpdates }: ServeOptions) {
+async function isPortInUse(port: number): Promise<boolean> {
+  try {
+    const socket = await Bun.connect({
+      hostname: "localhost",
+      port,
+      socket: { data() {}, open() {}, close() {}, error() {} },
+    });
+    socket.end();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function serveDirectory({ port, directory, watchForUpdates }: ServeOptions) {
+  if (await isPortInUse(port)) {
+    console.error(`Port ${port} is already in use. Exiting.`);
+    process.exit(1);
+  }
+
   const ft = getFileTree(directory);
   printFiletree(ft);
 
@@ -94,6 +113,8 @@ export function serveDirectory({ port, directory, watchForUpdates }: ServeOption
         const html = jsxToHtml(page);
         ctx.set.headers["content-type"] = "text/html";
         return ctx.status(200, html);
+      } else if (contentData.type === "static-file") {
+        return new Response(Bun.file(contentData.filepath));
       } else {
         const text = fs.readFileSync(contentData.filepath).toString();
         const content = await renderHtml(text);

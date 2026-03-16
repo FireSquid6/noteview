@@ -5,7 +5,7 @@ Have a notebook of markdown files? Want to view it in the browser? This is a sim
 
 ```
 $ noteview --help
-Usage: mdserve [options]
+Usage: noteview [options]
 
 Serve a directory of markdown files for easy viewing
 
