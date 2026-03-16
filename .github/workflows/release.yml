@@ -30,11 +30,11 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/binaries/mdserve-linux-x64
-            dist/binaries/mdserve-linux-arm64
-            dist/binaries/mdserve-macos-x64
-            dist/binaries/mdserve-macos-arm64
-            dist/binaries/mdserve-windows-x64.exe
+            dist/binaries/notesview-linux-x64
+            dist/binaries/notesview-linux-arm64
+            dist/binaries/notesview-macos-x64
+            dist/binaries/notesview-macos-arm64
+            dist/binaries/notesview-windows-x64.exe
           draft: false
           prerelease: false
           generate_release_notes: true

@@ -19,15 +19,11 @@ A local markdown notebook viewer and static site exporter. Point it at a directo
 
 ## Installation
 
-Noteview's only dependency is [bun](https://bun.sh), which you'll need to install first. After that:
-
 ```bash
-git clone https://github.com/firesquid6/noteview
-cd noteview
-./build/local-install.sh
+curl -fsSL https://raw.githubusercontent.com/firesquid6/noteview/main/install.sh | bash
 ```
 
-This puts `noteview` in `~/.local/bin`. Add it to your PATH if needed:
+This downloads the correct binary for your OS and architecture from the latest release and places it in `~/.local/bin`. Add that to your PATH if needed:
 
 ```bash
 # bash / zsh
@@ -35,6 +31,16 @@ export PATH="$PATH:$HOME/.local/bin"
 ```
 
 Fish users: `fish_add_path ~/.local/bin`
+
+### Build from source
+
+Requires [bun](https://bun.sh):
+
+```bash
+git clone https://github.com/firesquid6/noteview
+cd noteview
+./build/local-install.sh
+```
 
 
 ## Usage
