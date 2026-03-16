@@ -1,53 +1,84 @@
 
 # Noteview
 
-Have a notebook of markdown files? Want to view it in the browser? This is a simple solution to do that.
+A local markdown notebook viewer and static site exporter. Point it at a directory of `.md` files and get a clean, fully-featured reading experience in the browser — or export the whole thing to a static site or PDF.
 
-```
-$ noteview --help
-Usage: noteview [options]
+## Features
 
-Serve a directory of markdown files for easy viewing
-
-Options:
-  -d, --directory <dir>  The directory to serve
-  --only-markdown        Whether to only serve markdown files
-  -p, --port <port>      The port to serve on (default: "4242")
-  -w, --watch            Whether to watch the directory for changes or not
-  -h, --help             display help for command
-```
-
-# Features
-- Sleek and elegant UI
-- Code syntax highlighting
-- Latex rendering for math expressions
-- Sidebar file browser
+- Sleek dark/light theme UI with a collapsible sidebar file browser
+- Renders LaTeX math expressions with KaTeX (`$inline$` and `$$display$$`)
+- Mermaid diagram support (flowcharts, sequence diagrams, etc.)
+- Syntax-highlighted code blocks via highlight.js
+- Full-text search across all files
+- Live reload when files change (`--watch`)
+- Local `.md` links work automatically — no extension required
+- Front matter support (YAML metadata is stripped before rendering)
+- Export a directory to a self-contained static website
+- Export a single file to PDF
 
 
-# Installation
-Noteview's only dependency is [bun](https://bun.sh), which you'll need to install first. After that, just:
+## Installation
 
+Noteview's only dependency is [bun](https://bun.sh), which you'll need to install first. After that:
 
 ```bash
 git clone https://github.com/firesquid6/noteview
 cd noteview
-
 ./build/local-install.sh
 ```
 
-After that, `noteview` will be in `~/.local/bin`. You should add this to your path if you haven't already by adding:
+This puts `noteview` in `~/.local/bin`. Add it to your PATH if needed:
 
 ```bash
+# bash / zsh
 export PATH="$PATH:$HOME/.local/bin"
 ```
 
-To your `~/.bashrc` (other shells like fish or zsh will require different setup).
+Fish users: `fish_add_path ~/.local/bin`
 
 
-# To Do
+## Usage
+
+### Serve a directory
+
+```bash
+noteview serve -d ./my-notes
+```
+
+Open `http://localhost:4242` in your browser. The sidebar lists all markdown files in the directory tree. Options:
+
+| Flag | Description |
+|------|-------------|
+| `-d, --directory <dir>` | Directory to serve (required) |
+| `-p, --port <port>` | Port to listen on (default: `4242`) |
+| `-w, --watch` | Reload automatically when files change |
+| `--only-markdown` | Hide non-markdown files from the sidebar |
+
+### Export to a static site
+
+```bash
+noteview export -i ./my-notes -o ./site
+```
+
+Walks the entire directory tree and produces a fully self-contained static website in the output directory. Every markdown file becomes an `index.html` inside a folder matching its path, preserving the same extensionless URL structure used by the dev server. Static assets (images, etc.) are copied as-is. All CSS, JS, and fonts are bundled into the output so no external dependencies are needed at runtime.
+
+The output can be served by any static host (Nginx, GitHub Pages, Netlify, etc.).
+
+> The output directory must not be inside the input directory.
+
+### Export a single file to PDF
+
+```bash
+noteview to-pdf -i ./my-notes/report.md -o ./report.pdf
+```
+
+Renders the markdown file through a headless browser so that LaTeX, Mermaid diagrams, syntax-highlighted code, and images all appear exactly as they do in the browser. The output directory is created automatically if it does not exist.
+
+
+## To Do
 
 - [x] proper styling
-- [x] latex rendering 
+- [x] latex rendering
 - [x] sidebar
 - [x] work with spaces correctly
 - [x] directory listing page
@@ -61,4 +92,5 @@ To your `~/.bashrc` (other shells like fish or zsh will require different setup)
 - [x] mermaid rendering
 - [x] better print view
 - [x] theme switching
-
+- [x] static site export
+- [x] PDF export
