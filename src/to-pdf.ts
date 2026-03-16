@@ -1,6 +1,6 @@
 import { renderHtml } from "./renderer";
-import { readFileSync, writeFileSync, unlinkSync } from "fs";
-import { resolve, dirname, basename } from "path";
+import { readFileSync, writeFileSync, unlinkSync, mkdirSync, statSync } from "fs";
+import { resolve, dirname, basename, extname } from "path";
 import { tmpdir } from "os";
 import { join } from "path";
 import puppeteer from "puppeteer";
@@ -65,8 +65,26 @@ function buildHtmlPage(contentHtml: string, fileDir: string, title: string): str
 
 export async function exportToPdf(inputPath: string, outputPath: string): Promise<void> {
   const absoluteInput = resolve(inputPath);
+  const absoluteOutput = resolve(outputPath);
   const fileDir = dirname(absoluteInput);
   const title = basename(absoluteInput, ".md");
+
+  // Validate output path
+  if (extname(absoluteOutput).toLowerCase() !== ".pdf") {
+    console.error(`Error: output file must end in .pdf (got "${outputPath}")`);
+    process.exit(1);
+  }
+  try {
+    if (statSync(absoluteOutput).isDirectory()) {
+      console.error(`Error: output path "${outputPath}" is a directory`);
+      process.exit(1);
+    }
+  } catch {
+    // File doesn't exist yet — that's fine
+  }
+
+  // Create output directory if it doesn't exist
+  mkdirSync(dirname(absoluteOutput), { recursive: true });
 
   console.log(`Rendering ${absoluteInput}...`);
   const markdown = readFileSync(absoluteInput, "utf-8");
@@ -94,7 +112,6 @@ export async function exportToPdf(inputPath: string, outputPath: string): Promis
         console.warn("Warning: some Mermaid diagrams may not have fully rendered");
       });
 
-    const absoluteOutput = resolve(outputPath);
     await page.pdf({
       path: absoluteOutput,
       format: "A4",

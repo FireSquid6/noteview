@@ -2,6 +2,8 @@
 import { Command } from "@commander-js/extra-typings";
 import { serveDirectory, type ServeOptions } from "./server";
 import { exportToPdf } from "./to-pdf";
+import { exportSite } from "./export-site";
+import path from "path";
 
 
 const pdfCommand = new Command()
@@ -13,6 +15,22 @@ const pdfCommand = new Command()
     await exportToPdf(input, output);
   })
 
+const exportCommand = new Command()
+  .name("export")
+  .description("exports a directory of markdown files into a static website")
+  .requiredOption("-i, --input <file>", "The input directory")
+  .requiredOption("-o, --output <file>", "The output directory")
+  .action(async ({ input, output }) => {
+    const absoluteInput = path.resolve(input);
+    const absoluteOutput = path.resolve(output);
+
+    if (absoluteOutput.startsWith(absoluteInput + path.sep) || absoluteOutput === absoluteInput) {
+      console.error("Error: output directory must not be inside the input directory");
+      process.exit(1);
+    }
+
+    await exportSite(absoluteInput, absoluteOutput);
+  })
 
 const serveCommand = new Command()
   .name("serve")
@@ -37,5 +55,6 @@ const program = new Command()
 
 program.addCommand(pdfCommand);
 program.addCommand(serveCommand);
+program.addCommand(exportCommand);
 
 program.parse(process.argv);
