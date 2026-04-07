@@ -108,6 +108,12 @@ function getDirectoryChildren(directory: string): Node[] {
         filepath: filepath,
       }
 
+      children.sort((a, b) => {
+        if (a.type === "directory" && b.type === "file") return -1;
+        if (a.type === "file" && b.type === "directory") return 1;
+        return a.name.localeCompare(b.name);
+      });
+
       nodes.push({
         type: "directory",
         children,
