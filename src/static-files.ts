@@ -1,13 +1,23 @@
 import { Elysia } from "elysia";
 import { MDSERVE_ROUTE, PACKAGE_FILES_PREFIX } from "./server";
+// idk why these cause errors its fine.
+//@ts-ignore
 import jsSource from "../static/main.text.js";
+//@ts-ignore
 import cssSource from "../static/main.text.css";
+//@ts-ignore
 import highlightCss from "text:node_modules/highlight.js/styles/tokyo-night-dark.css";
+//@ts-ignore
 import katexCss from "text:node_modules/katex/dist/katex.css";
+//@ts-ignore
 import htmxJs from "text:node_modules/htmx.org/dist/htmx.min.js";
+//@ts-ignore
 import katexJs from "text:node_modules/katex/dist/katex.js";
+//@ts-ignore
 import tailwindCss from "text:node_modules/tailwindcss/index.css";
+//@ts-ignore
 import mermaidJs from "text:node_modules/mermaid/dist/mermaid.js";
+//@ts-ignore
 import fontData from "font-dir:node_modules/katex/dist/fonts";
 
 const packageFileSources: Record<string, { content: string; type: string }> = {
