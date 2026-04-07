@@ -1,4 +1,5 @@
 {
+  "exculde": ["node_modules"],
   "compilerOptions": {
     // Enable latest features
     "lib": ["ESNext", "DOM"],

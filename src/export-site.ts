@@ -3,9 +3,16 @@ import path from "path";
 import { getFileTree, type Node } from "./filemap";
 import { renderHtml } from "./renderer";
 import { getContentPage, getDirectoryPage, jsxToHtml } from "./frontend";
-import { packageFiles } from "./static-files";
-
 const PACKAGE_ROOT = path.resolve(import.meta.dir, "..");
+
+const packageFiles: Record<string, string> = {
+  "highlight.css": "node_modules/highlight.js/styles/tokyo-night-dark.css",
+  "katex.css": "node_modules/katex/dist/katex.css",
+  "htmx.js": "node_modules/htmx.org/dist/htmx.min.js",
+  "katex.js": "node_modules/katex/dist/katex.js",
+  "tailwind.css": "node_modules/tailwindcss/index.css",
+  "mermaid.js": "node_modules/mermaid/dist/mermaid.js",
+};
 
 export async function exportSite(inputDir: string, outputDir: string): Promise<void> {
   const absoluteInput = path.resolve(inputDir);
