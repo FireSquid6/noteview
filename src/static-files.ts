@@ -1,24 +1,14 @@
 import { Elysia } from "elysia";
 import { MDSERVE_ROUTE, PACKAGE_FILES_PREFIX } from "./server";
-// idk why these cause errors its fine.
-//@ts-ignore
-import jsSource from "../static/main.text.js";
-//@ts-ignore
-import cssSource from "../static/main.text.css";
-//@ts-ignore
-import highlightCss from "text:node_modules/highlight.js/styles/tokyo-night-dark.css";
-//@ts-ignore
-import katexCss from "text:node_modules/katex/dist/katex.css";
-//@ts-ignore
-import htmxJs from "text:node_modules/htmx.org/dist/htmx.min.js";
-//@ts-ignore
-import katexJs from "text:node_modules/katex/dist/katex.js";
-//@ts-ignore
-import tailwindCss from "text:node_modules/tailwindcss/index.css";
-//@ts-ignore
-import mermaidJs from "text:node_modules/mermaid/dist/mermaid.js";
-//@ts-ignore
-import fontData from "font-dir:node_modules/katex/dist/fonts";
+import path from "path";
+import jsSource from "../static/main.text.js" with { type: "text" };
+import cssSource from "../static/main.text.css" with { type: "text" };
+import highlightCss from "highlight.js/styles/tokyo-night-dark.css" with { type: "text" };
+import katexCss from "katex/dist/katex.css" with { type: "text" };
+import htmxJs from "htmx.org/dist/htmx.min.js" with { type: "text" };
+import katexJs from "katex/dist/katex.js" with { type: "text" };
+import tailwindCss from "tailwindcss/index.css" with { type: "text" };
+import mermaidJs from "mermaid/dist/mermaid.js" with { type: "text" };
 
 const packageFileSources: Record<string, { content: string; type: string }> = {
   "highlight.css": { content: highlightCss, type: "text/css" },
@@ -28,6 +18,8 @@ const packageFileSources: Record<string, { content: string; type: string }> = {
   "tailwind.css": { content: tailwindCss, type: "text/css" },
   "mermaid.js": { content: mermaidJs, type: "text/javascript" },
 };
+
+const katexFontsDirectory = path.resolve(import.meta.dir, "..", "node_modules", "katex", "dist", "fonts");
 
 export function staticFilesPlugin() {
   return new Elysia()
@@ -39,10 +31,12 @@ export function staticFilesPlugin() {
       ctx.set.headers["content-type"] = "text/css";
       return ctx.status(200, cssSource);
     })
-    .get(`${PACKAGE_FILES_PREFIX}/fonts/*`, (ctx) => {
+    .get(`${PACKAGE_FILES_PREFIX}/fonts/*`, async (ctx) => {
       const fontName = ctx.path.split("/").pop()!;
-      const base64 = (fontData as Record<string, string>)[fontName];
-      if (!base64) return ctx.status(404);
+      if (fontName !== path.basename(fontName)) return ctx.status(404);
+      const fontPath = path.join(katexFontsDirectory, fontName);
+      const fontFile = Bun.file(fontPath);
+      if (!(await fontFile.exists())) return ctx.status(404);
 
       const ext = fontName.split(".").pop()!;
       const mimeTypes: Record<string, string> = {
@@ -51,7 +45,7 @@ export function staticFilesPlugin() {
         ttf: "font/ttf",
       };
       ctx.set.headers["content-type"] = mimeTypes[ext] ?? "application/octet-stream";
-      return ctx.status(200, Buffer.from(base64, "base64"));
+      return ctx.status(200, fontFile);
     })
     .get(`${PACKAGE_FILES_PREFIX}/*`, (ctx) => {
       const requestedFilename = ctx.path.split("/").pop()!;

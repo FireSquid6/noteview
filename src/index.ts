@@ -1,10 +1,6 @@
 
 import { Command } from "@commander-js/extra-typings";
-import { serveDirectory, type ServeOptions } from "./server";
-import { exportToPdf } from "./to-pdf";
-import { exportSite } from "./export-site";
 import path from "path";
-
 
 const pdfCommand = new Command()
   .name("to-pdf")
@@ -12,6 +8,7 @@ const pdfCommand = new Command()
   .requiredOption("-i, --input <file>", "The input file (.md)")
   .requiredOption("-o, --output <file>", "The output file (.pdf)")
   .action(async ({ input, output }) => {
+    const { exportToPdf } = await import("./to-pdf");
     await exportToPdf(input, output);
   })
 
@@ -21,6 +18,7 @@ const exportCommand = new Command()
   .requiredOption("-i, --input <file>", "The input directory")
   .requiredOption("-o, --output <file>", "The output directory")
   .action(async ({ input, output }) => {
+    const { exportSite } = await import("./export-site");
     const absoluteInput = path.resolve(input);
     const absoluteOutput = path.resolve(output);
 
@@ -39,12 +37,13 @@ const serveCommand = new Command()
   .option("--only-markdown", "Whether to only serve markdown files")
   .option("-p, --port <port>", "The port to serve on", "4242")
   .option("-w, --watch", "Whether to watch the directory for changes or not")
-  .action((opts) => {
-    const options: ServeOptions = {
+  .action(async (opts) => {
+    const { serveDirectory } = await import("./server");
+    const options = {
       directory: opts.directory,
       port: parseInt(opts.port),
       watchForUpdates: opts.watch ?? false,
-    }
+    };
 
     serveDirectory(options);
   })
