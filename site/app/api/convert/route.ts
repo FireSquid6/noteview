@@ -140,18 +140,19 @@ export async function POST(request: NextRequest) {
         )
         .catch(() => {})
 
-      pdfBuffer = await page.pdf({
+      const raw = await page.pdf({
         format: 'A4',
         printBackground: true,
         margin: { top: '2cm', right: '2cm', bottom: '2cm', left: '2cm' },
       })
+      pdfBuffer = new Uint8Array(raw.buffer as ArrayBuffer)
     } finally {
       await browser.close()
       try { unlinkSync(tempFile) } catch {}
     }
 
     const filename = `${title}.pdf`
-    return new Response(pdfBuffer, {
+    return new Response(new Blob([pdfBuffer.buffer as ArrayBuffer], { type: 'application/pdf' }), {
       status: 200,
       headers: {
         'Content-Type': 'application/pdf',
