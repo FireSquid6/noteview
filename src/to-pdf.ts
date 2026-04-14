@@ -1,11 +1,12 @@
 import { renderHtml } from "./renderer";
 import { readFileSync, writeFileSync, unlinkSync, mkdirSync, statSync } from "fs";
 import { resolve, dirname, basename, extname } from "path";
+import { fileURLToPath } from "url";
 import { tmpdir } from "os";
 import { join } from "path";
 import puppeteer from "puppeteer";
 
-const PACKAGE_ROOT = resolve(import.meta.dir, "..");
+const PACKAGE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 function resolvePackageFile(relativePath: string): string {
   return resolve(PACKAGE_ROOT, relativePath);
@@ -123,5 +124,45 @@ export async function exportToPdf(inputPath: string, outputPath: string): Promis
   } finally {
     await browser.close();
     unlinkSync(tempFile);
+  }
+}
+
+/**
+ * Convert a markdown string to a PDF buffer.
+ * Used by the web site API route.
+ */
+export async function convertMarkdownToPdf(
+  markdown: string,
+  title: string,
+  fileDir: string = process.cwd()
+): Promise<Uint8Array> {
+  const contentHtml = await renderHtml(markdown);
+  const html = buildHtmlPage(contentHtml, fileDir, title);
+
+  const tempFile = join(tmpdir(), `mdserve-${Date.now()}.html`);
+  writeFileSync(tempFile, html, "utf-8");
+
+  const browser = await puppeteer.launch({ headless: true });
+  try {
+    const page = await browser.newPage();
+    await page.goto(`file://${tempFile}`, { waitUntil: "networkidle0" });
+
+    await page
+      .waitForFunction(
+        () => document.querySelectorAll(".mermaid:not([data-processed])").length === 0,
+        { timeout: 15000 }
+      )
+      .catch(() => {});
+
+    const raw = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: { top: "2cm", right: "2cm", bottom: "2cm", left: "2cm" },
+    });
+
+    return new Uint8Array(raw);
+  } finally {
+    await browser.close();
+    try { unlinkSync(tempFile); } catch { /* ignore */ }
   }
 }
