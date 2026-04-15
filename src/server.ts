@@ -1,5 +1,6 @@
 import { Elysia } from "elysia";
 import fs from "fs";
+import os from "os";
 import path from "path";
 import { renderHtml } from "./renderer";
 import { getContentPage, getDirectoryPage, getSidebarForPage, jsxToHtml } from "./frontend";
@@ -41,10 +42,15 @@ export async function serveDirectory({ port, directory, watchForUpdates }: Serve
 
   const ft = getFileTree(directory);
   printFiletree(ft);
+  const customThemePath = path.join(os.homedir(), ".config", "noteview", "theme.css");
+  const customThemeHref =
+    fs.existsSync(customThemePath) && fs.statSync(customThemePath).isFile()
+      ? `${MDSERVE_ROUTE}/theme.css`
+      : undefined;
 
   const app = new Elysia()
     .state("filetree", ft)
-    .use(staticFilesPlugin())
+    .use(staticFilesPlugin({ customThemePath: customThemeHref ? customThemePath : null }))
     .get("/__partials/*", async (ctx) => {
       const pathParts = decodeURI(ctx.path).split("/");
 
@@ -108,6 +114,7 @@ export async function serveDirectory({ port, directory, watchForUpdates }: Serve
           filetree: ctx.store.filetree,
           activePath: pathParts,
           directoryName: filename,
+          customThemeHref,
         });
 
         const html = jsxToHtml(page);
@@ -125,6 +132,7 @@ export async function serveDirectory({ port, directory, watchForUpdates }: Serve
           activePath: pathParts,
           content,
           filename,
+          customThemeHref,
         });
         const html = jsxToHtml(page);
 
@@ -177,4 +185,3 @@ function timeoutRun<T extends (...args: any[]) => any>(
     }
   };
 }
-

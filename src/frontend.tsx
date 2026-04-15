@@ -8,21 +8,24 @@ export interface ContentPageOptions {
   filename: string;
   filetree: Node;
   activePath: string[];
+  customThemeHref?: string;
 }
 
 export interface DirectoryPageOptions {
   directoryName: string;
   filetree: Node;
   activePath: string[];
+  customThemeHref?: string;
 }
 
 
-export function getContentPage({ content, filename, filetree, activePath }: ContentPageOptions): JSX.Element {
+export function getContentPage({ content, filename, filetree, activePath, customThemeHref }: ContentPageOptions): JSX.Element {
   return (
     <Layout
       filetree={filetree}
       filename={filename}
       activePath={activePath}
+      customThemeHref={customThemeHref}
     >
       {content}
     </Layout>
@@ -30,12 +33,13 @@ export function getContentPage({ content, filename, filetree, activePath }: Cont
 }
 
 
-export function getDirectoryPage({ filetree, directoryName, activePath }: DirectoryPageOptions): JSX.Element {
+export function getDirectoryPage({ filetree, directoryName, activePath, customThemeHref }: DirectoryPageOptions): JSX.Element {
   return (
     <Layout
       filename={directoryName}
       filetree={filetree}
       activePath={activePath}
+      customThemeHref={customThemeHref}
     >
       <NoIndexDirectory
         title={directoryName}
@@ -57,4 +61,3 @@ export function getSidebarForPage(filetree: Node, activePath: string[]): JSX.Ele
     />
   )
 }
-

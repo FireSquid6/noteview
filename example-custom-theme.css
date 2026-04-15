@@ -1,0 +1,193 @@
+/*
+  Noteview custom theme template
+  --------------------------------
+  Copy this file to:
+    ~/.config/noteview/theme.css
+
+  This stylesheet is loaded AFTER Noteview's built-in CSS, so any rules you
+  uncomment/modify here will override defaults.
+*/
+
+/* ==========================================================================
+   1) Global base
+   ========================================================================== */
+
+/* html { font-size: 17px; } */
+
+/* body {
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.7;
+  color: #e5e7eb;
+  background-color: #0b1020;
+} */
+
+/* ==========================================================================
+   2) Header
+   ========================================================================== */
+
+/* .header {
+  background-color: #111827;
+  border-bottom: 1px solid #1f2937;
+} */
+
+/* .header-title {
+  color: #f9fafb;
+  letter-spacing: 0.015em;
+} */
+
+/* .filename-display {
+  color: #93c5fd;
+  background-color: #1e293b;
+  border: 1px solid #334155;
+} */
+
+/* .search-toggle,
+.theme-toggle,
+.sidebar-toggle {
+  color: #cbd5e1;
+} */
+
+/* .search-toggle:hover,
+.theme-toggle:hover,
+.sidebar-toggle:hover {
+  background-color: #1f2937;
+} */
+
+/* ==========================================================================
+   3) Sidebar
+   ========================================================================== */
+
+/* .sidebar {
+  background-color: #0f172a;
+  border-right: 1px solid #1e293b;
+  border-left: 1px solid #1e293b;
+} */
+
+/* .sidebar-header {
+  border-bottom: 1px solid #1e293b;
+} */
+
+/* .sidebar-header h3 {
+  color: #e2e8f0;
+} */
+
+/* .file-item:hover {
+  background-color: #1e293b;
+} */
+
+/* .file-item.active {
+  background-color: #38bdf8;
+  color: #082f49;
+} */
+
+/* .file-name {
+  color: #cbd5e1;
+} */
+
+/* ==========================================================================
+   4) Main content
+   ========================================================================== */
+
+/* .content {
+  max-width: 78ch;
+  color: #e5e7eb;
+} */
+
+/* .content h1,
+.content h2,
+.content h3,
+.content h4 {
+  color: #f8fafc;
+} */
+
+/* .content a {
+  color: #60a5fa;
+} */
+
+/* .content a:hover {
+  color: #93c5fd;
+} */
+
+/* .content blockquote {
+  border-left: 4px solid #38bdf8;
+  color: #cbd5e1;
+  background: #0f172a;
+} */
+
+/* .content hr {
+  border-color: #334155;
+} */
+
+/* ==========================================================================
+   5) Code + preformatted blocks
+   ========================================================================== */
+
+/* .content pre {
+  border: 1px solid #334155;
+  border-radius: 10px;
+  background: #020617;
+} */
+
+/* .content code {
+  font-family: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.92em;
+} */
+
+/* .content :not(pre) > code {
+  background: #1e293b;
+  color: #e2e8f0;
+  padding: 0.15em 0.35em;
+  border-radius: 6px;
+} */
+
+/* ==========================================================================
+   6) Tables + media
+   ========================================================================== */
+
+/* .content table {
+  border-collapse: collapse;
+} */
+
+/* .content th,
+.content td {
+  border: 1px solid #334155;
+  padding: 0.5rem 0.75rem;
+} */
+
+/* .content th {
+  background: #1e293b;
+} */
+
+/* .content img {
+  border-radius: 10px;
+  border: 1px solid #334155;
+} */
+
+/* ==========================================================================
+   7) Light mode override example
+   ========================================================================== */
+
+/* html[data-theme="light"] body {
+  color: #111827;
+  background-color: #f8fafc;
+} */
+
+/* html[data-theme="light"] .header {
+  background-color: #ffffff;
+  border-bottom-color: #e2e8f0;
+} */
+
+/* html[data-theme="light"] .sidebar {
+  background-color: #f8fafc;
+  border-color: #e2e8f0;
+} */
+
+/* html[data-theme="light"] .file-item:hover {
+  background-color: #e2e8f0;
+} */
+
+/* ==========================================================================
+   8) Quick test rule (uncomment to confirm your file is loading)
+   ========================================================================== */
+
+/* body { outline: 3px solid #ff00aa; } */

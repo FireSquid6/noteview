@@ -21,7 +21,11 @@ const packageFileSources: Record<string, { content: string; type: string }> = {
 
 const katexFontsDirectory = path.resolve(import.meta.dir, "..", "node_modules", "katex", "dist", "fonts");
 
-export function staticFilesPlugin() {
+export interface StaticFilesPluginOptions {
+  customThemePath: string | null;
+}
+
+export function staticFilesPlugin({ customThemePath }: StaticFilesPluginOptions) {
   return new Elysia()
     .get(`${MDSERVE_ROUTE}/main.js`, (ctx) => {
       ctx.set.headers["content-type"] = "text/javascript";
@@ -30,6 +34,13 @@ export function staticFilesPlugin() {
     .get(`${MDSERVE_ROUTE}/main.css`, (ctx) => {
       ctx.set.headers["content-type"] = "text/css";
       return ctx.status(200, cssSource);
+    })
+    .get(`${MDSERVE_ROUTE}/theme.css`, async (ctx) => {
+      if (customThemePath === null) return ctx.status(404);
+      const themeFile = Bun.file(customThemePath);
+      if (!(await themeFile.exists())) return ctx.status(404);
+      ctx.set.headers["content-type"] = "text/css";
+      return ctx.status(200, themeFile);
     })
     .get(`${PACKAGE_FILES_PREFIX}/fonts/*`, async (ctx) => {
       const fontName = ctx.path.split("/").pop()!;

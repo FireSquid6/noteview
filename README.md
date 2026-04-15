@@ -15,6 +15,7 @@ A local markdown notebook viewer and static site exporter. Point it at a directo
 - Front matter support (YAML metadata is stripped before rendering)
 - Export a directory to a self-contained static website
 - Export a single file to PDF
+- Optional user theme override from `~/.config/noteview/theme.css` (loaded after default styles)
 
 
 ## Installation
