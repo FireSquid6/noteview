@@ -11,8 +11,9 @@ const pdfCommand = new Command()
   .description("exports a file to pdf")
   .requiredOption("-i, --input <file>", "The input file (.md)")
   .requiredOption("-o, --output <file>", "The output file (.pdf)")
-  .action(async ({ input, output }) => {
-    await exportToPdf(input, output);
+  .option("--mla", "Format the PDF as an MLA document")
+  .action(async ({ input, output, mla }) => {
+    await exportToPdf(input, output, mla ?? false);
   })
 
 const exportCommand = new Command()
