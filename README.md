@@ -13,6 +13,9 @@ A local markdown notebook viewer and static site exporter. Point it at a directo
 - Live reload when files change (`--watch`)
 - Local `.md` links work automatically — no extension required
 - Front matter support (YAML metadata is stripped before rendering)
+- Optional MLA document formatting using front matter metadata
+- GFM-style footnotes with linked references and backlinks
+- Structured MLA works cited sections using `<workscited>` blocks
 - Export a directory to a self-contained static website
 - Export a single file to PDF
 
@@ -79,6 +82,86 @@ noteview to-pdf -i ./my-notes/report.md -o ./report.pdf
 ```
 
 Renders the markdown file through a headless browser so that LaTeX, Mermaid diagrams, syntax-highlighted code, and images all appear exactly as they do in the browser. The output directory is created automatically if it does not exist.
+
+Pass `--mla` to format the PDF for US Letter paper with one-inch margins:
+
+```bash
+noteview to-pdf -i ./my-notes/report.md -o ./report.pdf --mla
+```
+
+### MLA formatting
+
+Use the `MLA` button in the site header to apply MLA-style typography, spacing, margins, and document metadata independently of the light or dark color theme. The setting persists between pages.
+
+MLA metadata comes from these optional front matter fields. Quote the values so they remain strings:
+
+```markdown
+---
+name: "Jordan Lee"
+professor: "Professor Morgan"
+class: "English 101"
+date: "2 September 2026"
+title: "Memory and Place in Modern Fiction"
+---
+```
+
+Missing or invalid fields are omitted. The `title` field is also used for the browser and PDF document title, while the application header continues to show the filename.
+
+### Footnotes
+
+Add a reference with `[^label]` and define its content with a matching `[^label]:` line:
+
+```markdown
+Memory changes as it is recalled.[^memory]
+
+[^memory]: This note can contain **formatted text**, links, and other Markdown.
+```
+
+References are numbered in reading order, and every note includes a link back to the corresponding reference. Reusing a label creates multiple backlinks. Indent continuation lines by four spaces to include multiple paragraphs, lists, blockquotes, or code blocks in a note. Notes are collected at the end of the rendered document in served pages, static exports, and PDFs.
+
+### Works cited
+
+Add a `<workscited>` block to render an alphabetized MLA works cited section in both normal and MLA display modes. The block contains a YAML list using a supported subset of [CSL-JSON](https://citeproc-js.readthedocs.io/en/latest/csl-json/markup.html):
+
+```markdown
+<workscited>
+- id: morrison-beloved
+  type: book
+  author:
+    - family: Morrison
+      given: Toni
+  title: Beloved
+  publisher: Vintage
+  issued:
+    date-parts:
+      - [2004]
+- id: goldman-transport
+  type: article-journal
+  author:
+    - family: Goldman
+      given: Anne
+  title: Questions of Transport
+  container-title: The Georgia Review
+  volume: "64"
+  issue: "1"
+  page: 69-88
+  issued:
+    date-parts:
+      - [2010]
+  URL: https://www.jstor.org/stable/41403188
+</workscited>
+```
+
+Each entry requires a unique `id`, a `type`, and a `title`. Supported types are `book`, `chapter`, `article-journal`, `article-magazine`, `article-newspaper`, `webpage`, `report`, `motion_picture`, and `thesis`.
+
+Optional scalar fields are `container-title`, `publisher`, `publisher-place`, `edition`, `volume`, `issue`, `page`, `URL`, `DOI`, `title-short`, and `genre`. The `author`, `editor`, and `translator` fields contain lists of names. Personal names use `family` and optional `given`, `suffix`, and particle fields; organizations use `literal`:
+
+```yaml
+author:
+  - literal: World Health Organization
+```
+
+The `issued` and `accessed` fields accept `date-parts` containing `[year]`, `[year, month]`, or `[year, month, day]`. They can instead contain a `literal` string for dates that cannot be represented numerically. Invalid data produces a visible authoring error rather than silently emitting an incorrect bibliography.
 
 
 ## To Do

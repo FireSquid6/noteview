@@ -6,18 +6,19 @@ import type { Node } from "@/filemap";
 
 interface LayoutProps {
   filename: string;
+  documentTitle?: string;
   filetree: Node;
   children: JSX.Element;
   activePath: string[];
 }
 
-export function Layout({ filename, filetree, children, activePath }: LayoutProps): JSX.Element {
+export function Layout({ filename, documentTitle = filename, filetree, children, activePath }: LayoutProps): JSX.Element {
   return (
     <html>
       <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Noteview - {filename}</title>
+        <title safe>Noteview - {documentTitle}</title>
         <link rel="stylesheet" href={`${PACKAGE_FILES_PREFIX}/highlight.css`} />
         <link rel="stylesheet" href={`${PACKAGE_FILES_PREFIX}/katex.css`} />
         <link rel="stylesheet" href={`${MDSERVE_ROUTE}/main.css`} />

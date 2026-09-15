@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import fs from "fs";
 import path from "path";
 import { renderHtml } from "./renderer";
-import { getContentPage, getDirectoryPage, getSidebarForPage, jsxToHtml } from "./frontend";
+import { getContentPage, getDirectoryPage, getDocumentContent, getSidebarForPage, jsxToHtml } from "./frontend";
 import { getFileTree, matchFilePath, printFilemap as printFiletree } from "./filemap";
 import { staticFilesPlugin } from "./static-files";
 import { searchFileTree } from "./search";
@@ -63,9 +63,10 @@ export async function serveDirectory({ port, directory, watchForUpdates }: Serve
         return ctx.status(200, "NO_UPDATE");
       } else {
         const text = fs.readFileSync(contentData.filepath).toString();
-        const content = await renderHtml(text);
+        const document = await renderHtml(text);
+        const filename = path.basename(contentData.filepath);
 
-        return ctx.status(200, content);
+        return ctx.status(200, getDocumentContent(document, filename));
       }
 
     })
@@ -117,13 +118,13 @@ export async function serveDirectory({ port, directory, watchForUpdates }: Serve
         return new Response(Bun.file(contentData.filepath));
       } else {
         const text = fs.readFileSync(contentData.filepath).toString();
-        const content = await renderHtml(text);
+        const document = await renderHtml(text);
 
 
         const page = getContentPage({
           filetree: ctx.store.filetree,
           activePath: pathParts,
-          content,
+          document,
           filename,
         });
         const html = jsxToHtml(page);
@@ -177,4 +178,3 @@ function timeoutRun<T extends (...args: any[]) => any>(
     }
   };
 }
-

@@ -2,9 +2,11 @@ import type { Node } from "./filemap";
 import { Layout } from "./frontend/components/Layout";
 import { NoIndexDirectory } from "./frontend/components/NoIndexDirectory";
 import { Sidebar } from "./frontend/components/Sidebar";
+import { DocumentContent } from "./frontend/components/DocumentContent";
+import type { RenderedMarkdown } from "./renderer";
 
 export interface ContentPageOptions {
-  content: string;
+  document: RenderedMarkdown;
   filename: string;
   filetree: Node;
   activePath: string[];
@@ -17,14 +19,15 @@ export interface DirectoryPageOptions {
 }
 
 
-export function getContentPage({ content, filename, filetree, activePath }: ContentPageOptions): JSX.Element {
+export function getContentPage({ document, filename, filetree, activePath }: ContentPageOptions): JSX.Element {
   return (
     <Layout
       filetree={filetree}
       filename={filename}
+      documentTitle={document.mla.title ?? filename}
       activePath={activePath}
     >
-      {content}
+      <DocumentContent document={document} filename={filename} />
     </Layout>
   )
 }
@@ -58,3 +61,6 @@ export function getSidebarForPage(filetree: Node, activePath: string[]): JSX.Ele
   )
 }
 
+export function getDocumentContent(document: RenderedMarkdown, filename: string): JSX.Element {
+  return <DocumentContent document={document} filename={filename} />;
+}
