@@ -8,10 +8,7 @@ const PACKAGE_ROOT = path.resolve(import.meta.dir, "..");
 const packageFiles: Record<string, string> = {
   "highlight.css": "node_modules/highlight.js/styles/tokyo-night-dark.css",
   "katex.css": "node_modules/katex/dist/katex.css",
-  "htmx.js": "node_modules/htmx.org/dist/htmx.min.js",
-  "katex.js": "node_modules/katex/dist/katex.js",
-  "tailwind.css": "node_modules/tailwindcss/index.css",
-  "mermaid.js": "node_modules/mermaid/dist/mermaid.js",
+  "mermaid.js": "node_modules/mermaid/dist/mermaid.min.js",
 };
 
 export async function exportSite(inputDir: string, outputDir: string): Promise<void> {
@@ -104,8 +101,8 @@ function copyAssets(outputRoot: string): void {
     path.join(mdserveDir, "main.js")
   );
 
-  // Package files (highlight.css, katex.css, katex.js, mermaid.js, htmx.js, …)
   const pkgFilesDir = path.join(outputRoot, "__packagefiles");
+  fs.rmSync(pkgFilesDir, { recursive: true, force: true });
   fs.mkdirSync(pkgFilesDir, { recursive: true });
   for (const [name, relativePath] of Object.entries(packageFiles)) {
     const src = path.join(PACKAGE_ROOT, relativePath);

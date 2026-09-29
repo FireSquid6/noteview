@@ -6,6 +6,7 @@ import { getContentPage, getDirectoryPage, getSidebarForPage, jsxToHtml } from "
 import { getFileTree, matchFilePath, printFilemap as printFiletree } from "./filemap";
 import { staticFilesPlugin } from "./static-files";
 import { searchFileTree } from "./search";
+import { textResponse } from "./http-response";
 
 
 export interface ServeOptions {
@@ -13,11 +14,6 @@ export interface ServeOptions {
   directory: string;
   watchForUpdates: boolean;
 }
-
-export const MDSERVE_ROUTE = "/__mdserve"
-export const PACKAGE_FILES_PREFIX = "/__packagefiles";
-
-
 
 async function isPortInUse(port: number): Promise<boolean> {
   try {
@@ -58,28 +54,26 @@ export async function serveDirectory({ port, directory, watchForUpdates }: Serve
         return ctx.status(404);
       }
 
-      ctx.set.headers["content-type"] = "text/plain";
       if (contentData.type === "directory-listing") {
-        return ctx.status(200, "NO_UPDATE");
+        return textResponse(ctx.request, "NO_UPDATE", "text/plain; charset=utf-8");
       } else {
         const text = fs.readFileSync(contentData.filepath).toString();
         const content = await renderHtml(text);
 
-        return ctx.status(200, content);
+        return textResponse(ctx.request, content, "text/html; charset=utf-8");
       }
 
     })
     .get("/__only-sidebar/*", async (ctx) => {
       const pathParts = decodeURI(ctx.path).split("/");
 
-      while (pathParts[0] === "" || pathParts[0] === "__partials") {
+      while (pathParts[0] === "" || pathParts[0] === "__only-sidebar") {
         pathParts.shift();
       }
       
-      const sidebar = getSidebarForPage(ctx.store.filetree, pathParts);
+      const sidebar = await getSidebarForPage(ctx.store.filetree, pathParts);
 
-      ctx.set.headers["content-type"] = "text/plain";
-      return ctx.status(200, sidebar);
+      return textResponse(ctx.request, sidebar, "text/html; charset=utf-8");
 
     })
     .get("/__search", (ctx) => {
@@ -111,8 +105,7 @@ export async function serveDirectory({ port, directory, watchForUpdates }: Serve
         });
 
         const html = jsxToHtml(page);
-        ctx.set.headers["content-type"] = "text/html";
-        return ctx.status(200, html);
+        return textResponse(ctx.request, html, "text/html; charset=utf-8");
       } else if (contentData.type === "static-file") {
         return new Response(Bun.file(contentData.filepath));
       } else {
@@ -128,8 +121,7 @@ export async function serveDirectory({ port, directory, watchForUpdates }: Serve
         });
         const html = jsxToHtml(page);
 
-        ctx.set.headers["content-type"] = "text/html";
-        return ctx.status(200, html);
+        return textResponse(ctx.request, html, "text/html; charset=utf-8");
       }
 
     })
@@ -177,4 +169,3 @@ function timeoutRun<T extends (...args: any[]) => any>(
     }
   };
 }
-

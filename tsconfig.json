@@ -31,7 +31,6 @@
       "@/*": ["./src/*"]
     },
     "types": [
-      "@kitajs/html/htmx.d.ts",
       "bun-types"
     ]
   }
