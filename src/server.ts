@@ -2,7 +2,7 @@ import { Elysia } from "elysia";
 import fs from "fs";
 import path from "path";
 import { renderHtml } from "./renderer";
-import { getContentPage, getDirectoryPage, getSidebarForPage, jsxToHtml } from "./frontend";
+import { getContentPage, getDirectoryPage, getDocumentContent, getSidebarForPage, jsxToHtml } from "./frontend";
 import { getFileTree, matchFilePath, printFilemap as printFiletree } from "./filemap";
 import { staticFilesPlugin } from "./static-files";
 import { searchFileTree } from "./search";
@@ -58,9 +58,14 @@ export async function serveDirectory({ port, directory, watchForUpdates }: Serve
         return textResponse(ctx.request, "NO_UPDATE", "text/plain; charset=utf-8");
       } else {
         const text = fs.readFileSync(contentData.filepath).toString();
-        const content = await renderHtml(text);
+        const document = await renderHtml(text);
+        const filename = path.basename(contentData.filepath);
 
-        return textResponse(ctx.request, content, "text/html; charset=utf-8");
+        return textResponse(
+          ctx.request,
+          await getDocumentContent(document, filename),
+          "text/html; charset=utf-8"
+        );
       }
 
     })
@@ -110,13 +115,13 @@ export async function serveDirectory({ port, directory, watchForUpdates }: Serve
         return new Response(Bun.file(contentData.filepath));
       } else {
         const text = fs.readFileSync(contentData.filepath).toString();
-        const content = await renderHtml(text);
+        const document = await renderHtml(text);
 
 
         const page = getContentPage({
           filetree: ctx.store.filetree,
           activePath: pathParts,
-          content,
+          document,
           filename,
         });
         const html = jsxToHtml(page);

@@ -63,9 +63,9 @@ async function walkAndExport(
 
   if (content.type === "markdown-file") {
     const text = fs.readFileSync(content.filepath, "utf-8");
-    const rendered = await renderHtml(text);
+    const document = await renderHtml(text);
     const page = getContentPage({
-      content: rendered,
+      document,
       filename: path.basename(content.filepath),
       filetree,
       activePath: pathParts,

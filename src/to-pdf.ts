@@ -1,4 +1,6 @@
 import { renderHtml } from "./renderer";
+import { DocumentContent } from "./frontend/components/DocumentContent";
+import { escapeHtml } from "@kitajs/html";
 import { readFileSync, writeFileSync, unlinkSync, mkdirSync, statSync } from "fs";
 import { resolve, dirname, basename, extname } from "path";
 import { tmpdir } from "os";
@@ -24,7 +26,7 @@ function resolveImagePaths(html: string, fileDir: string): string {
   );
 }
 
-function buildHtmlPage(contentHtml: string, fileDir: string, title: string): string {
+function buildHtmlPage(contentHtml: string, fileDir: string, title: string, mlaMode: boolean): string {
   const highlightCss = resolvePackageFile("node_modules/highlight.js/styles/tokyo-night-dark.css");
   const katexCss = resolvePackageFile("node_modules/katex/dist/katex.css");
   const mainCss = resolvePackageFile("static/main.text.css");
@@ -33,11 +35,11 @@ function buildHtmlPage(contentHtml: string, fileDir: string, title: string): str
   const processed = resolveImagePaths(contentHtml, fileDir);
 
   return `<!DOCTYPE html>
-<html data-theme="light">
+<html data-theme="light"${mlaMode ? ' data-mla="true"' : ""}>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${title}</title>
+  <title>${escapeHtml(title)}</title>
   <link rel="stylesheet" href="file://${highlightCss}" />
   <link rel="stylesheet" href="file://${katexCss}" />
   <link rel="stylesheet" href="file://${mainCss}" />
@@ -63,11 +65,11 @@ function buildHtmlPage(contentHtml: string, fileDir: string, title: string): str
 </html>`;
 }
 
-export async function exportToPdf(inputPath: string, outputPath: string): Promise<void> {
+export async function exportToPdf(inputPath: string, outputPath: string, mlaMode = false): Promise<void> {
   const absoluteInput = resolve(inputPath);
   const absoluteOutput = resolve(outputPath);
   const fileDir = dirname(absoluteInput);
-  const title = basename(absoluteInput, ".md");
+  const filename = basename(absoluteInput);
 
   // Validate output path
   if (extname(absoluteOutput).toLowerCase() !== ".pdf") {
@@ -88,16 +90,19 @@ export async function exportToPdf(inputPath: string, outputPath: string): Promis
 
   console.log(`Rendering ${absoluteInput}...`);
   const markdown = readFileSync(absoluteInput, "utf-8");
-  const contentHtml = await renderHtml(markdown);
+  const renderedDocument = await renderHtml(markdown);
+  const title = renderedDocument.mla.title ?? basename(absoluteInput, ".md");
+  const contentHtml = `${DocumentContent({ document: renderedDocument, filename })}`;
 
-  const html = buildHtmlPage(contentHtml, fileDir, title);
+  const html = buildHtmlPage(contentHtml, fileDir, title, mlaMode);
 
   // Write to a temp file so that file:// relative URLs (fonts, etc.) resolve correctly
   const tempFile = join(tmpdir(), `mdserve-${Date.now()}.html`);
   writeFileSync(tempFile, html, "utf-8");
 
-  const browser = await puppeteer.launch({ headless: true });
+  let browser: Awaited<ReturnType<typeof puppeteer.launch>> | undefined;
   try {
+    browser = await puppeteer.launch({ headless: true });
     console.log("Launching headless browser...");
     const page = await browser.newPage();
     await page.goto(`file://${tempFile}`, { waitUntil: "networkidle0" });
@@ -114,14 +119,16 @@ export async function exportToPdf(inputPath: string, outputPath: string): Promis
 
     await page.pdf({
       path: absoluteOutput,
-      format: "A4",
+      format: mlaMode ? "letter" : "A4",
       printBackground: true,
-      margin: { top: "2cm", right: "2cm", bottom: "2cm", left: "2cm" },
+      margin: mlaMode
+        ? undefined
+        : { top: "2cm", right: "2cm", bottom: "2cm", left: "2cm" },
     });
 
     console.log(`Saved to ${absoluteOutput}`);
   } finally {
-    await browser.close();
+    await browser?.close();
     unlinkSync(tempFile);
   }
 }

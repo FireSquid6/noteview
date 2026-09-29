@@ -6,6 +6,8 @@ import fm from "front-matter";
 // @ts-expect-error no types
 import extendedLatex from "marked-extended-latex";
 import markedMermaid from "@maddyguthridge/marked-mermaid";
+import markedFootnote from "marked-footnote";
+import { worksCitedExtension } from "./works-cited";
 
 
 const options = {
@@ -28,6 +30,12 @@ marked.use(markedHighlight({
   }
 }));
 marked.use(markedMermaid())
+marked.use(markedFootnote({
+  refMarkers: true,
+  footnoteDivider: true,
+  backRefLabel: "Back to footnote reference",
+}));
+marked.use({ extensions: [worksCitedExtension] });
 
 // Rewrite local .md links to match the server's extensionless routing
 marked.use({
@@ -47,9 +55,51 @@ marked.use({
   }
 });
 
-export async function renderHtml(markdown: string): Promise<string> {
-  const { body } = fm(markdown);
-  const html = await marked(body);
+export interface MlaMetadata {
+  name?: string;
+  professor?: string;
+  class?: string;
+  date?: string;
+  title?: string;
+}
 
-  return html;
+export interface RenderedMarkdown {
+  html: string;
+  mla: MlaMetadata;
+}
+
+const mlaFields = ["name", "professor", "class", "date", "title"] as const;
+
+function normalizeFootnoteHtml(html: string): string {
+  let backRefIndex = 0;
+
+  return html
+    .replace('<h2 id="footnote-label"', '<h2 id="footnotes-label"')
+    .replaceAll('aria-describedby="footnote-label"', 'aria-describedby="footnotes-label"')
+    .replace(/(<sup><a id=")footnote-ref-/g, "$1footnote-reference-")
+    .replace(/(<sup><a id="[^"]+" href="#)footnote-/g, "$1footnote-note-")
+    .replace(/(<li id=")footnote-/g, "$1footnote-note-")
+    .replace(/(<a href="#)footnote-ref-([^\"]+" data-footnote-backref)/g, "$1footnote-reference-$2")
+    .replaceAll('aria-label="Back to footnote reference"', () => {
+      backRefIndex += 1;
+      return `aria-label="Back to footnote reference ${backRefIndex}"`;
+    });
+}
+
+export async function renderHtml(markdown: string): Promise<RenderedMarkdown> {
+  const { attributes, body } = fm(markdown) as { attributes: unknown; body: string };
+  const html = normalizeFootnoteHtml(await marked(body));
+  const mla: MlaMetadata = {};
+
+  if (typeof attributes === "object" && attributes !== null) {
+    const values = attributes as Record<string, unknown>;
+    for (const field of mlaFields) {
+      const value = values[field];
+      if (typeof value === "string" && value.trim()) {
+        mla[field] = value.trim();
+      }
+    }
+  }
+
+  return { html, mla };
 }

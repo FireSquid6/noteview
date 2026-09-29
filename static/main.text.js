@@ -10,6 +10,18 @@ function getStoredTheme() {
 const initialTheme = getStoredTheme();
 document.documentElement.setAttribute('data-theme', initialTheme);
 
+function getStoredMlaMode() {
+  try {
+    return localStorage.getItem('mlaMode') === 'true';
+  } catch {
+    return false;
+  }
+}
+
+if (getStoredMlaMode()) {
+  document.documentElement.setAttribute('data-mla', 'true');
+}
+
 const mermaidSources = new WeakMap();
 let mermaidLoadPromise;
 
@@ -93,6 +105,10 @@ async function refreshContent() {
 
   const element = document.getElementById("content-container");
   element.innerHTML = html;
+  const refreshedDocument = element.querySelector('.mla-document');
+  if (refreshedDocument?.dataset.documentTitle) {
+    document.title = `Noteview - ${refreshedDocument.dataset.documentTitle}`;
+  }
   await renderMermaid();
 }
 
@@ -201,6 +217,34 @@ document.addEventListener('DOMContentLoaded', function() {
     themeToggle.addEventListener('click', function() {
       const current = document.documentElement.getAttribute('data-theme') || 'dark';
       setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+  }
+
+  const mlaToggle = document.getElementById('mla-toggle');
+
+  function updateMlaToggle(active) {
+    if (!mlaToggle) return;
+    mlaToggle.classList.toggle('active', active);
+    mlaToggle.setAttribute('aria-pressed', String(active));
+  }
+
+  function setMlaMode(active) {
+    if (active) {
+      document.documentElement.setAttribute('data-mla', 'true');
+    } else {
+      document.documentElement.removeAttribute('data-mla');
+    }
+    try {
+      localStorage.setItem('mlaMode', String(active));
+    } catch {}
+    updateMlaToggle(active);
+  }
+
+  updateMlaToggle(getStoredMlaMode());
+
+  if (mlaToggle) {
+    mlaToggle.addEventListener('click', function() {
+      setMlaMode(document.documentElement.getAttribute('data-mla') !== 'true');
     });
   }
 

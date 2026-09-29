@@ -15,7 +15,7 @@ const root: Node = {
 
 test("layout keeps feature runtimes off the blocking path", () => {
   const html = jsxToHtml(getContentPage({
-    content: "<p>Hello</p>",
+    document: { html: "<p>Hello</p>", mla: {} },
     filename: "index.md",
     filetree: root,
     activePath: [],
