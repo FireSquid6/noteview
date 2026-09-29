@@ -30,7 +30,7 @@ function buildHtmlPage(contentHtml: string, fileDir: string, title: string, mlaM
   const highlightCss = resolvePackageFile("node_modules/highlight.js/styles/tokyo-night-dark.css");
   const katexCss = resolvePackageFile("node_modules/katex/dist/katex.css");
   const mainCss = resolvePackageFile("static/main.text.css");
-  const mermaidJs = resolvePackageFile("node_modules/mermaid/dist/mermaid.js");
+  const mermaidJs = resolvePackageFile("node_modules/mermaid/dist/mermaid.min.js");
 
   const processed = resolveImagePaths(contentHtml, fileDir);
 

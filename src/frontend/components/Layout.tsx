@@ -1,4 +1,4 @@
-import { MDSERVE_ROUTE, PACKAGE_FILES_PREFIX } from "../../server";
+import { MDSERVE_ROUTE, PACKAGE_FILES_PREFIX } from "../../routes";
 import { Header } from "./Header";
 import { Sidebar } from "./Sidebar";
 import { SearchModal } from "./SearchModal";
@@ -22,12 +22,10 @@ export function Layout({ filename, documentTitle = filename, filetree, children,
         <link rel="stylesheet" href={`${PACKAGE_FILES_PREFIX}/highlight.css`} />
         <link rel="stylesheet" href={`${PACKAGE_FILES_PREFIX}/katex.css`} />
         <link rel="stylesheet" href={`${MDSERVE_ROUTE}/main.css`} />
-        <script src={`${PACKAGE_FILES_PREFIX}/htmx.js`} />
-        <script src={`${PACKAGE_FILES_PREFIX}/mermaid.js`} />
-        <script src={`${PACKAGE_FILES_PREFIX}/katex.js`} />
-        <script src={`${MDSERVE_ROUTE}/main.js`} />
+        <script>{`try{document.documentElement.setAttribute("data-theme",localStorage.getItem("theme")||"dark")}catch{document.documentElement.setAttribute("data-theme","dark")}`}</script>
+        <script defer src={`${MDSERVE_ROUTE}/main.js`} />
       </head>
-      <body hx-boost>
+      <body>
         <div class="app-layout">
           <Header filename={filename} />
           <div class="main-layout">

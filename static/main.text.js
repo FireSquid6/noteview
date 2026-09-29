@@ -22,13 +22,27 @@ if (getStoredMlaMode()) {
   document.documentElement.setAttribute('data-mla', 'true');
 }
 
-mermaid.initialize({
-  securityLevel: "loose",
-  theme: initialTheme === 'dark' ? 'dark' : 'default',
-});
-
-// Mermaid source preservation
 const mermaidSources = new WeakMap();
+let mermaidLoadPromise;
+
+function loadMermaid() {
+  if (window.mermaid) {
+    return Promise.resolve(window.mermaid);
+  }
+  if (!mermaidLoadPromise) {
+    mermaidLoadPromise = new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = '/__packagefiles/mermaid.js';
+      script.onload = () => window.mermaid ? resolve(window.mermaid) : reject(new Error('Mermaid did not initialize'));
+      script.onerror = () => reject(new Error('Unable to load Mermaid'));
+      document.head.appendChild(script);
+    }).catch(error => {
+      mermaidLoadPromise = undefined;
+      throw error;
+    });
+  }
+  return mermaidLoadPromise;
+}
 
 function saveMermaidSources() {
   document.querySelectorAll('.mermaid:not([data-processed])').forEach(el => {
@@ -38,12 +52,28 @@ function saveMermaidSources() {
   });
 }
 
-async function reRenderMermaid(theme) {
+async function renderMermaid(theme = getStoredTheme()) {
+  const elements = document.querySelectorAll('.mermaid:not([data-processed])');
+  if (elements.length === 0) {
+    return;
+  }
+
+  saveMermaidSources();
+  const mermaid = await loadMermaid();
   mermaid.initialize({
-    securityLevel: "loose",
+    startOnLoad: false,
+    securityLevel: 'loose',
     theme: theme === 'dark' ? 'dark' : 'default',
   });
-  const elements = document.querySelectorAll('.mermaid[data-processed]');
+  await mermaid.run({ nodes: elements });
+}
+
+async function reRenderMermaid(theme) {
+  const elements = document.querySelectorAll('.mermaid');
+  if (elements.length === 0) {
+    return;
+  }
+
   elements.forEach(el => {
     const source = mermaidSources.get(el);
     if (source) {
@@ -51,9 +81,7 @@ async function reRenderMermaid(theme) {
       el.textContent = source;
     }
   });
-  if (elements.length > 0) {
-    await mermaid.run();
-  }
+  await renderMermaid(theme);
 }
 
 function getCurrentPath() {
@@ -81,8 +109,7 @@ async function refreshContent() {
   if (refreshedDocument?.dataset.documentTitle) {
     document.title = `Noteview - ${refreshedDocument.dataset.documentTitle}`;
   }
-  saveMermaidSources();
-  await mermaid.run();
+  await renderMermaid();
 }
 
 function refreshPage() {
@@ -252,8 +279,7 @@ document.addEventListener('DOMContentLoaded', function() {
     themeBeforePrint = null;
   });
 
-  // Save mermaid sources for any diagrams already in the page
-  saveMermaidSources();
+  renderMermaid(initialTheme).catch(error => console.error(error));
 
   setupWebsocket();
   initSearch();
