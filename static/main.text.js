@@ -93,7 +93,11 @@ async function refreshSidebar() {
   const html = await response.text();
   const element = document.getElementById("sidebar-container");
 
+  const wasCollapsed = element.querySelector('#sidebar')?.classList.contains('collapsed');
   element.innerHTML = html;
+  if (wasCollapsed) {
+    element.querySelector('#sidebar')?.classList.add('collapsed');
+  }
 }
 
 async function refreshContent() {
@@ -131,7 +135,6 @@ function setupWebsocket() {
 
 document.addEventListener('DOMContentLoaded', function() {
   const sidebarToggle = document.getElementById('sidebar-toggle');
-  const sidebar = document.getElementById('sidebar');
 
   function isMobileView() {
     return window.innerWidth <= 1024;
@@ -139,7 +142,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   function updateSidebarForResize() {
     if (!isMobileView()) {
-      sidebar.classList.remove('collapsed');
+      document.getElementById('sidebar')?.classList.remove('collapsed');
       const icon = sidebarToggle?.querySelector('.toggle-icon');
       if (icon) {
         icon.textContent = '\u2630';
@@ -150,8 +153,10 @@ document.addEventListener('DOMContentLoaded', function() {
   updateSidebarForResize();
   window.addEventListener('resize', updateSidebarForResize);
 
-  if (sidebarToggle && sidebar) {
+  if (sidebarToggle) {
     sidebarToggle.addEventListener('click', function() {
+      const sidebar = document.getElementById('sidebar');
+      if (!sidebar) return;
       sidebar.classList.toggle('collapsed');
       const icon = sidebarToggle.querySelector('.toggle-icon');
       if (icon) {
