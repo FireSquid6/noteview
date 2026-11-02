@@ -1,17 +1,13 @@
 import { renderHtml } from "./renderer";
 import { DocumentContent } from "./frontend/components/DocumentContent";
 import { escapeHtml } from "@kitajs/html";
-import { readFileSync, writeFileSync, unlinkSync, mkdirSync, statSync } from "fs";
-import { resolve, dirname, basename, extname } from "path";
+import { readFileSync, writeFileSync, rmSync, mkdirSync, mkdtempSync, statSync } from "fs";
+import { resolve, dirname, basename, extname, join } from "path";
 import { tmpdir } from "os";
-import { join } from "path";
+import { pathToFileURL } from "url";
 import puppeteer from "puppeteer";
+import { writeAssets } from "./write-assets";
 
-const PACKAGE_ROOT = resolve(import.meta.dir, "..");
-
-function resolvePackageFile(relativePath: string): string {
-  return resolve(PACKAGE_ROOT, relativePath);
-}
 
 // Convert relative image src paths to absolute file:// URLs so puppeteer can load them
 function resolveImagePaths(html: string, fileDir: string): string {
@@ -26,11 +22,8 @@ function resolveImagePaths(html: string, fileDir: string): string {
   );
 }
 
-function buildHtmlPage(contentHtml: string, fileDir: string, title: string, mlaMode: boolean): string {
-  const highlightCss = resolvePackageFile("node_modules/highlight.js/styles/tokyo-night-dark.css");
-  const katexCss = resolvePackageFile("node_modules/katex/dist/katex.css");
-  const mainCss = resolvePackageFile("static/main.text.css");
-  const mermaidJs = resolvePackageFile("node_modules/mermaid/dist/mermaid.min.js");
+function buildHtmlPage(contentHtml: string, fileDir: string, assetDir: string, title: string, mlaMode: boolean): string {
+  const assetUrl = (relativePath: string) => pathToFileURL(join(assetDir, relativePath)).href;
 
   const processed = resolveImagePaths(contentHtml, fileDir);
 
@@ -40,10 +33,10 @@ function buildHtmlPage(contentHtml: string, fileDir: string, title: string, mlaM
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>${escapeHtml(title)}</title>
-  <link rel="stylesheet" href="file://${highlightCss}" />
-  <link rel="stylesheet" href="file://${katexCss}" />
-  <link rel="stylesheet" href="file://${mainCss}" />
-  <script src="file://${mermaidJs}"></script>
+  <link rel="stylesheet" href="${assetUrl("__packagefiles/highlight.css")}" />
+  <link rel="stylesheet" href="${assetUrl("__packagefiles/katex.css")}" />
+  <link rel="stylesheet" href="${assetUrl("__mdserve/main.css")}" />
+  <script src="${assetUrl("__packagefiles/mermaid.js")}"></script>
   <script>
     mermaid.initialize({ startOnLoad: false, theme: 'default', securityLevel: 'loose' });
   </script>
@@ -94,18 +87,16 @@ export async function exportToPdf(inputPath: string, outputPath: string, mlaMode
   const title = renderedDocument.mla.title ?? basename(absoluteInput, ".md");
   const contentHtml = `${DocumentContent({ document: renderedDocument, filename })}`;
 
-  const html = buildHtmlPage(contentHtml, fileDir, title, mlaMode);
-
-  // Write to a temp file so that file:// relative URLs (fonts, etc.) resolve correctly
-  const tempFile = join(tmpdir(), `mdserve-${Date.now()}.html`);
-  writeFileSync(tempFile, html, "utf-8");
-
+  const tempDir = mkdtempSync(join(tmpdir(), "noteview-pdf-"));
   let browser: Awaited<ReturnType<typeof puppeteer.launch>> | undefined;
   try {
+    writeAssets(tempDir);
+    const tempFile = join(tempDir, "index.html");
+    writeFileSync(tempFile, buildHtmlPage(contentHtml, fileDir, tempDir, title, mlaMode), "utf-8");
     browser = await puppeteer.launch({ headless: true });
     console.log("Launching headless browser...");
     const page = await browser.newPage();
-    await page.goto(`file://${tempFile}`, { waitUntil: "networkidle0" });
+    await page.goto(pathToFileURL(tempFile).href, { waitUntil: "networkidle0" });
 
     // Wait for Mermaid to finish processing all diagrams
     await page
@@ -129,6 +120,6 @@ export async function exportToPdf(inputPath: string, outputPath: string, mlaMode
     console.log(`Saved to ${absoluteOutput}`);
   } finally {
     await browser?.close();
-    unlinkSync(tempFile);
+    rmSync(tempDir, { recursive: true, force: true });
   }
 }

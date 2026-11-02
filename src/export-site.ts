@@ -3,13 +3,7 @@ import path from "path";
 import { getFileTree, type Node } from "./filemap";
 import { renderHtml } from "./renderer";
 import { getContentPage, getDirectoryPage, jsxToHtml } from "./frontend";
-const PACKAGE_ROOT = path.resolve(import.meta.dir, "..");
-
-const packageFiles: Record<string, string> = {
-  "highlight.css": "node_modules/highlight.js/styles/tokyo-night-dark.css",
-  "katex.css": "node_modules/katex/dist/katex.css",
-  "mermaid.js": "node_modules/mermaid/dist/mermaid.min.js",
-};
+import { writeAssets } from "./write-assets";
 
 export async function exportSite(inputDir: string, outputDir: string): Promise<void> {
   const absoluteInput = path.resolve(inputDir);
@@ -31,7 +25,8 @@ export async function exportSite(inputDir: string, outputDir: string): Promise<v
   console.log(`Exporting ${absoluteInput} → ${absoluteOutput}`);
   await walkAndExport(filetree, [], absoluteInput, absoluteOutput, filetree);
 
-  copyAssets(absoluteOutput);
+  writeAssets(absoluteOutput);
+  console.log("  assets copied");
   console.log("Done.");
 }
 
@@ -86,38 +81,4 @@ async function walkAndExport(
       await walkAndExport(child, [...pathParts, child.name], inputRoot, outputRoot, filetree);
     }
   }
-}
-
-function copyAssets(outputRoot: string): void {
-  // main.css and main.js
-  const mdserveDir = path.join(outputRoot, "__mdserve");
-  fs.mkdirSync(mdserveDir, { recursive: true });
-  fs.copyFileSync(
-    path.join(PACKAGE_ROOT, "static/main.text.css"),
-    path.join(mdserveDir, "main.css")
-  );
-  fs.copyFileSync(
-    path.join(PACKAGE_ROOT, "static/main.text.js"),
-    path.join(mdserveDir, "main.js")
-  );
-
-  const pkgFilesDir = path.join(outputRoot, "__packagefiles");
-  fs.rmSync(pkgFilesDir, { recursive: true, force: true });
-  fs.mkdirSync(pkgFilesDir, { recursive: true });
-  for (const [name, relativePath] of Object.entries(packageFiles)) {
-    const src = path.join(PACKAGE_ROOT, relativePath);
-    if (fs.existsSync(src)) {
-      fs.copyFileSync(src, path.join(pkgFilesDir, name));
-    }
-  }
-
-  // KaTeX fonts (referenced as relative URLs from katex.css)
-  const srcFontsDir = path.join(PACKAGE_ROOT, "node_modules/katex/dist/fonts");
-  const destFontsDir = path.join(pkgFilesDir, "fonts");
-  fs.mkdirSync(destFontsDir, { recursive: true });
-  for (const fontFile of fs.readdirSync(srcFontsDir)) {
-    fs.copyFileSync(path.join(srcFontsDir, fontFile), path.join(destFontsDir, fontFile));
-  }
-
-  console.log("  assets copied");
 }

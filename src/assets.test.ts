@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { exportSite } from "./export-site";
+import { textLoaderPlugin } from "../build/plugin";
 import { getContentPage, jsxToHtml } from "./frontend";
 import type { Node } from "./filemap";
 
@@ -43,7 +43,15 @@ describe("static export assets", () => {
   let output: string;
 
   beforeAll(async () => {
-    workspace = fs.mkdtempSync(path.join(os.tmpdir(), "noteview-assets-"));
+    workspace = fs.mkdtempSync(path.join(process.env.TMPDIR ?? path.join(os.homedir(), ".hermes/cache/scratch"), "noteview-assets-"));
+    const bundle = await Bun.build({
+      entrypoints: [path.join(import.meta.dir, "export-site.ts")],
+      outdir: workspace,
+      target: "bun",
+      plugins: [textLoaderPlugin],
+    });
+    expect(bundle.success).toBe(true);
+    const { exportSite } = await import(bundle.outputs[0].path);
     input = path.join(workspace, "notes");
     output = path.join(workspace, "site");
     fs.mkdirSync(input);
